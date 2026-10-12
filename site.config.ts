@@ -5,12 +5,12 @@ export const site = {
   name: "ひで", // 表示名（ハンドルネームでもOK）
   role: "Web Engineer",
   tagline: "要件定義からリリースまで。\n作って、書いて、学び続けるエンジニア。",
-  url: "https://your-portfolio.vercel.app", // デプロイ後のURL
+  url: "https://portfolio-mu-cyan-46.vercel.app/", // デプロイ後のURL
 
   // 各サービスのユーザー名（URLの末尾部分）
-  zenn: "https://zenn.dev/hideweb", // https://zenn.dev/〇〇
-  note: "https://note.com/hide19912000", // https://note.com/〇〇
-  github: "https://github.com/hide199120", // https://github.com/〇〇
+  zenn: "hideweb", // https://zenn.dev/〇〇
+  note: "hide19912000", // https://note.com/〇〇
+  github: "hide199120", // https://github.com/〇〇
 
   // ally-study の公開URL（Renderのもの）
   allyStudyUrl: "https://ally-study.onrender.com/",
