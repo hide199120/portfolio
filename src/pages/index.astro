@@ -1,0 +1,425 @@
+---
+import { site, about, certifications, skills } from "../../site.config";
+import { getZennPosts, getNotePosts, getRepos, fmtDate } from "../lib/feeds";
+
+const [zenn, note, repos] = await Promise.all([
+  getZennPosts(site.zenn),
+  getNotePosts(site.note),
+  getRepos(site.github),
+]);
+
+const allyStack = [
+  "React", "TypeScript", "Redux Toolkit", "React Three Fiber", "Go / Gin", "MySQL",
+  "OpenAPI", "Docker", "GitHub Actions", "Jest", "Render", "TiDB Cloud",
+];
+const allyFeatures = [
+  { k: "3D Room", v: "React Three Fiber で描いた斜め上視点の部屋。キャラクターが机に向かって静かに動き続ける。" },
+  { k: "Ambient BGM", v: "雨音を含む複数のBGMから選択。作業の空気をつくる。" },
+  { k: "Themes", v: "森・秘密基地・雨などのテーマに合わせて、UIと家具が切り替わる。" },
+  { k: "Auth", v: "Go(Gin) + MySQL によるユーザーID＋パスワード認証。Cookieセッション方式。" },
+];
+const roadmap = [
+  { done: true, t: "ミニマム版（景色＋BGM）" },
+  { done: true, t: "3Dの部屋とキャラクター" },
+  { done: true, t: "Go API・DB・ログイン機能" },
+  { done: true, t: "URL公開（Render + TiDB Cloud）" },
+  { done: false, t: "AWS移行（EC2 + Docker Compose + CloudFront）" },
+];
+const year = new Date().getFullYear();
+---
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{site.name} — Portfolio</title>
+  <meta name="description" content={`${site.name}のポートフォリオ。個人開発 ally-study、技術記事、GitHub。`} />
+  <meta property="og:title" content={`${site.name} — Portfolio`} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={site.url} />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="rain" aria-hidden="true"></div>
+
+  <header class="nav">
+    <a href="#top" class="logo">{site.name}</a>
+    <nav>
+      <a href="#work">Work</a>
+      <a href="#writing">Writing</a>
+      <a href="#code">Code</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="label">// {site.role}</p>
+        <h1>{site.tagline.split("\n").map((l) => <span class="line">{l}</span>)}</h1>
+        <div class="hero-links">
+          <a class="chip" href={`https://zenn.dev/${site.zenn}`} target="_blank" rel="noopener">Zenn ↗</a>
+          <a class="chip" href={`https://note.com/${site.note}`} target="_blank" rel="noopener">note ↗</a>
+          <a class="chip" href={`https://github.com/${site.github}`} target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </div>
+      <figure class="window" aria-hidden="true">
+        <svg viewBox="0 0 320 360">
+          <defs>
+            <radialGradient id="glow" cx="50%" cy="55%" r="60%">
+              <stop offset="0%" stop-color="#ffcf7a" stop-opacity=".95" />
+              <stop offset="60%" stop-color="#ff9a3c" stop-opacity=".35" />
+              <stop offset="100%" stop-color="#ff9a3c" stop-opacity="0" />
+            </radialGradient>
+            <linearGradient id="room" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3a2a4a" />
+              <stop offset="100%" stop-color="#1c1626" />
+            </linearGradient>
+          </defs>
+          <rect x="30" y="30" width="260" height="300" rx="10" fill="url(#room)" />
+          <circle cx="160" cy="200" r="150" fill="url(#glow)" />
+          <!-- desk -->
+          <rect x="70" y="250" width="180" height="12" rx="3" fill="#6b4a3a" />
+          <rect x="82" y="262" width="8" height="58" fill="#4e362b" />
+          <rect x="230" y="262" width="8" height="58" fill="#4e362b" />
+          <!-- lamp -->
+          <path d="M210 250 L214 205 L228 196" stroke="#2a2030" stroke-width="4" fill="none" stroke-linecap="round" />
+          <path d="M218 190 l22 0 l-6 14 l-12 0z" fill="#2a2030" />
+          <!-- laptop -->
+          <rect x="112" y="226" width="56" height="24" rx="2" fill="#2a2030" />
+          <rect x="116" y="229" width="48" height="18" fill="#8fd3ff" opacity=".8" class="screen" />
+          <!-- person -->
+          <g class="person">
+            <circle cx="140" cy="186" r="15" fill="#2a2030" />
+            <path d="M118 250 q0-42 22-46 q22 4 22 46z" fill="#2a2030" />
+          </g>
+          <!-- plant -->
+          <rect x="74" y="232" width="18" height="18" rx="3" fill="#4e362b" />
+          <path d="M83 232 q-14-18 -4-30 M83 232 q10-20 2-34 M83 232 q16-10 14-24" stroke="#5fae7a" stroke-width="4" fill="none" stroke-linecap="round" />
+          <!-- frame -->
+          <rect x="30" y="30" width="260" height="300" rx="10" fill="none" stroke="#0e0b14" stroke-width="14" />
+          <line x1="160" y1="30" x2="160" y2="330" stroke="#0e0b14" stroke-width="8" />
+          <line x1="30" y1="150" x2="290" y2="150" stroke="#0e0b14" stroke-width="8" />
+        </svg>
+        <figcaption>ally-study — 今日も誰かが勉強している部屋</figcaption>
+      </figure>
+    </section>
+
+    <!-- FEATURED WORK -->
+    <section id="work" class="section">
+      <div class="section-head">
+        <p class="label">01 / Featured Work</p>
+        <h2>ally-study</h2>
+      </div>
+      <div class="ally">
+        <div class="ally-main card glow">
+          <p class="lead">勉強中にブラウザで開いておく、<br />「STUDY WITH ME」風のWebアプリ。</p>
+          <p>
+            画面の中の部屋で、キャラクターが黙々と机に向かい、雨音やBGMが流れている。
+            一人で勉強していても、誰かと同じ部屋にいるような感覚をつくるサービスです。
+            企画・設計・実装・インフラ・公開まで一人で手がけ、最小構成から段階的に機能を拡張しています。
+          </p>
+          <dl class="features">
+            {allyFeatures.map((f) => (<div><dt>{f.k}</dt><dd>{f.v}</dd></div>))}
+          </dl>
+          <div class="tags">{allyStack.map((s) => <span class="tag">{s}</span>)}</div>
+          <div class="cta">
+            <a class="btn primary" href={site.allyStudyUrl} target="_blank" rel="noopener">アプリを開く ↗</a>
+            <a class="btn" href={`https://zenn.dev/${site.zenn}`} target="_blank" rel="noopener">開発記をZennで読む ↗</a>
+          </div>
+          <p class="fine">※ 無料枠でホストしているため、初回アクセス時は起動に数十秒かかることがあります。</p>
+        </div>
+        <aside class="ally-side card">
+          <p class="label">Roadmap</p>
+          <ol class="roadmap">
+            {roadmap.map((r) => (<li class={r.done ? "done" : "next"}><span class="dot" />{r.t}</li>))}
+          </ol>
+          <p class="label" style="margin-top:2rem">Why</p>
+          <p class="small">
+            AIと一緒に書いたコードを「自分の言葉で説明できる」状態にするため、
+            実装したテーマごとにZennで設計と仕組みを解説する記事を書いています。
+          </p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- WRITING -->
+    <section id="writing" class="section">
+      <div class="section-head">
+        <p class="label">02 / Writing</p>
+        <h2>書いたもの</h2>
+      </div>
+      <div class="cols">
+        {[{ name: "Zenn", sub: "技術記事・開発記", posts: zenn, href: `https://zenn.dev/${site.zenn}` },
+          { name: "note", sub: "キャリア・学習記録", posts: note, href: `https://note.com/${site.note}` }].map((col) => (
+          <div class="card list">
+            <div class="list-head">
+              <h3>{col.name}</h3><span class="small muted">{col.sub}</span>
+            </div>
+            {col.posts.length ? (
+              <ul>
+                {col.posts.map((p) => (
+                  <li><a href={p.url} target="_blank" rel="noopener">
+                    <span class="date">{fmtDate(p.date)}</span><span class="t">{p.title}</span>
+                  </a></li>
+                ))}
+              </ul>
+            ) : (
+              <p class="small muted">記事一覧は {col.name} でご覧ください。</p>
+            )}
+            <a class="more" href={col.href} target="_blank" rel="noopener">すべて見る →</a>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- CODE -->
+    <section id="code" class="section">
+      <div class="section-head">
+        <p class="label">03 / Code</p>
+        <h2>GitHub</h2>
+      </div>
+      {repos.length ? (
+        <div class="repos">
+          {repos.map((r) => (
+            <a class="card repo" href={r.url} target="_blank" rel="noopener">
+              <h3>{r.name}</h3>
+              <p class="small muted">{r.description || "—"}</p>
+              <div class="repo-meta">
+                {r.language && <span><i class="lang" />{r.language}</span>}
+                <span>★ {r.stars}</span>
+                <span>{fmtDate(r.updated)}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p class="muted">公開リポジトリは <a href={`https://github.com/${site.github}`} target="_blank" rel="noopener">GitHub</a> でご覧ください。</p>
+      )}
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="section">
+      <div class="section-head">
+        <p class="label">04 / About</p>
+        <h2>About</h2>
+      </div>
+      <div class="about">
+        <div class="card">
+          {about.map((p) => <p>{p}</p>)}
+          <p class="label" style="margin-top:1.5rem">Certification</p>
+          {certifications.map((c) => (
+            <div class="cert"><span class="badge">AWS</span><div><strong>{c.name}</strong><br /><span class="small muted">{c.note}</span></div></div>
+          ))}
+        </div>
+        <div class="card">
+          {skills.map((s) => (
+            <div class="skill">
+              <p class="label">{s.group}</p>
+              <div class="tags">{s.items.map((i) => <span class="tag">{i}</span>)}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>© {year} {site.name}</span>
+    <span class="muted">Built with Astro · Hosted on Vercel</span>
+  </footer>
+</body>
+</html>
+
+<style is:global>
+  :root {
+    --bg: #0d0b14;
+    --bg-2: #15111f;
+    --card: rgba(255, 255, 255, 0.035);
+    --line: rgba(255, 255, 255, 0.09);
+    --text: #ece8f4;
+    --muted: #9b93ad;
+    --amber: #ffb35c;
+    --amber-2: #ff8a3c;
+    --sky: #8fd3ff;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background:
+      radial-gradient(900px 600px at 85% -10%, rgba(255, 150, 60, 0.12), transparent 60%),
+      radial-gradient(700px 500px at -10% 30%, rgba(120, 140, 255, 0.08), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Zen Kaku Gothic New", system-ui, sans-serif;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  .muted { color: var(--muted); }
+  .small { font-size: 0.9rem; }
+  .label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+  }
+
+  /* rain */
+  .rain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.18;
+    background-image: linear-gradient(to bottom, transparent 0, rgba(180, 200, 255, 0.5) 50%, transparent 100%);
+    background-size: 1px 90px;
+    mask-image: repeating-linear-gradient(90deg, #000 0 1px, transparent 1px 47px);
+    -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 1px, transparent 1px 47px);
+    animation: rain 0.9s linear infinite;
+  }
+  @keyframes rain { to { background-position: 0 90px; } }
+
+  .nav, main, .foot { position: relative; z-index: 1; }
+  .nav {
+    position: sticky; top: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem clamp(1rem, 5vw, 4rem);
+    backdrop-filter: blur(12px);
+    background: rgba(13, 11, 20, 0.6);
+    border-bottom: 1px solid var(--line);
+    z-index: 10;
+  }
+  .logo { font-family: "Unbounded", sans-serif; font-weight: 600; letter-spacing: 0.02em; }
+  .nav nav { display: flex; gap: clamp(0.8rem, 3vw, 2rem); font-family: "JetBrains Mono", monospace; font-size: 0.85rem; }
+  .nav nav a { color: var(--muted); transition: color 0.2s; }
+  .nav nav a:hover { color: var(--amber); }
+
+  main { max-width: 1160px; margin: 0 auto; padding: 0 clamp(1rem, 5vw, 2.5rem); }
+
+  /* hero */
+  .hero {
+    min-height: calc(100vh - 64px);
+    display: grid; grid-template-columns: 1.3fr 1fr; gap: 3rem; align-items: center;
+    padding: 4rem 0;
+  }
+  h1 {
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.7rem, 3.6vw, 2.9rem);
+    line-height: 1.35;
+    margin: 1.2rem 0 2rem;
+  }
+  h1 .line { display: block; }
+  h1 .line:first-child {
+    background: linear-gradient(90deg, var(--amber), #ffd9a0);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero-links { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+  .chip {
+    font-family: "JetBrains Mono", monospace; font-size: 0.85rem;
+    padding: 0.5rem 1.1rem; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--card); transition: all 0.2s;
+  }
+  .chip:hover { border-color: var(--amber); color: var(--amber); box-shadow: 0 0 24px rgba(255, 179, 92, 0.25); }
+
+  .window { text-align: center; }
+  .window svg { width: 100%; max-width: 380px; filter: drop-shadow(0 0 60px rgba(255, 160, 70, 0.35)); }
+  .window figcaption { font-family: "JetBrains Mono", monospace; font-size: 0.75rem; color: var(--muted); margin-top: 0.6rem; }
+  .person { animation: breathe 3.2s ease-in-out infinite; transform-origin: 140px 250px; }
+  .screen { animation: flicker 4s ease-in-out infinite; }
+  @keyframes breathe { 50% { transform: translateY(-2px) rotate(-1.2deg); } }
+  @keyframes flicker { 50% { opacity: 0.55; } }
+
+  /* sections */
+  .section { padding: 6rem 0; border-top: 1px solid var(--line); }
+  .section-head { margin-bottom: 2.5rem; }
+  h2 { font-family: "Unbounded", "Zen Kaku Gothic New", sans-serif; font-weight: 800; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.2; margin-top: 0.4rem; }
+  h3 { font-family: "Unbounded", sans-serif; font-weight: 600; font-size: 1.05rem; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: clamp(1.4rem, 3vw, 2.2rem);
+  }
+  .card.glow { box-shadow: 0 0 0 1px rgba(255, 179, 92, 0.15), 0 30px 80px -30px rgba(255, 140, 60, 0.35); }
+
+  .ally { display: grid; grid-template-columns: 1.7fr 1fr; gap: 1.2rem; }
+  .lead { font-size: clamp(1.2rem, 2.2vw, 1.5rem); font-weight: 700; line-height: 1.6; margin-bottom: 1rem; }
+  .ally-main > p { margin-bottom: 1rem; color: #d6d0e2; }
+  .features { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.6rem 0; }
+  .features div { border-left: 2px solid var(--amber); padding-left: 0.9rem; }
+  .features dt { font-family: "JetBrains Mono", monospace; font-size: 0.8rem; color: var(--amber); }
+  .features dd { font-size: 0.9rem; color: #cfc8dc; }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .tag {
+    font-family: "JetBrains Mono", monospace; font-size: 0.74rem;
+    padding: 0.25rem 0.7rem; border-radius: 999px;
+    background: rgba(143, 211, 255, 0.08); color: var(--sky); border: 1px solid rgba(143, 211, 255, 0.18);
+  }
+  .cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.8rem; }
+  .btn {
+    padding: 0.75rem 1.4rem; border-radius: 12px; border: 1px solid var(--line);
+    font-weight: 700; font-size: 0.95rem; transition: all 0.2s;
+  }
+  .btn:hover { border-color: var(--amber); }
+  .btn.primary { background: linear-gradient(135deg, var(--amber), var(--amber-2)); color: #1a1020; border: none; }
+  .btn.primary:hover { box-shadow: 0 0 30px rgba(255, 150, 60, 0.5); transform: translateY(-1px); }
+  .fine { font-size: 0.78rem; color: var(--muted); margin-top: 1rem; }
+
+  .roadmap { list-style: none; margin-top: 1rem; }
+  .roadmap li { display: flex; gap: 0.8rem; align-items: center; padding: 0.55rem 0; font-size: 0.92rem; position: relative; }
+  .roadmap .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .roadmap .done .dot { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
+  .roadmap .next { color: var(--muted); }
+  .roadmap .next .dot { border: 1.5px dashed var(--muted); }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  .list-head { display: flex; align-items: baseline; gap: 0.8rem; margin-bottom: 1rem; }
+  .list ul { list-style: none; }
+  .list li a { display: grid; grid-template-columns: 6.5rem 1fr; gap: 0.6rem; padding: 0.75rem 0; border-bottom: 1px solid var(--line); transition: color 0.2s; }
+  .list li a:hover { color: var(--amber); }
+  .date { font-family: "JetBrains Mono", monospace; font-size: 0.78rem; color: var(--muted); padding-top: 0.15rem; }
+  .t { font-size: 0.95rem; line-height: 1.6; }
+  .more { display: inline-block; margin-top: 1.2rem; font-family: "JetBrains Mono", monospace; font-size: 0.82rem; color: var(--amber); }
+
+  .repos { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+  .repo { transition: all 0.2s; display: flex; flex-direction: column; gap: 0.6rem; }
+  .repo:hover { border-color: rgba(255, 179, 92, 0.5); transform: translateY(-3px); }
+  .repo-meta { margin-top: auto; display: flex; gap: 1rem; font-family: "JetBrains Mono", monospace; font-size: 0.75rem; color: var(--muted); }
+  .lang { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--sky); margin-right: 0.35rem; }
+  .muted a { color: var(--amber); }
+
+  .about { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.2rem; }
+  .about .card > p { margin-bottom: 0.9rem; color: #d6d0e2; }
+  .cert { display: flex; gap: 1rem; align-items: center; margin-top: 0.8rem; }
+  .badge {
+    font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 0.8rem;
+    width: 56px; height: 56px; flex: none; display: grid; place-items: center; border-radius: 14px;
+    background: linear-gradient(135deg, var(--amber), var(--amber-2)); color: #1a1020;
+    box-shadow: 0 0 24px rgba(255, 150, 60, 0.35);
+  }
+  .skill + .skill { margin-top: 1.4rem; }
+  .skill .tags { margin-top: 0.6rem; }
+
+  .foot {
+    max-width: 1160px; margin: 0 auto; padding: 2.5rem clamp(1rem, 5vw, 2.5rem);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+    border-top: 1px solid var(--line); font-family: "JetBrains Mono", monospace; font-size: 0.8rem;
+  }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 3rem; }
+    .window { order: -1; }
+    .window svg { max-width: 240px; }
+    .ally, .cols, .about { grid-template-columns: 1fr; }
+    .features { grid-template-columns: 1fr; }
+    .nav nav { gap: 0.9rem; font-size: 0.75rem; }
+    .list li a { grid-template-columns: 1fr; gap: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rain, .person, .screen { animation: none; }
+  }
+</style>
